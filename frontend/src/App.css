@@ -1,0 +1,152 @@
+/* Global Reset and Base Styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Card and Component Styling */
+.card-body {
+  padding: 5px !important;
+}
+
+.list-group-item {
+  padding: 5px !important;
+}
+
+.form-group {
+  margin-bottom: 5px !important;
+}
+
+.btn-sm {
+  padding: 2px 6px !important;
+}
+
+/* Tight Layout for Tables */
+.table {
+  margin-bottom: 0 !important;
+}
+
+/* Search Section */
+.search-card .card-body {
+  padding: 10px;
+}
+
+.search-card .row > div {
+  padding: 0 5px;
+}
+
+.search-card .form-control,
+.search-card .form-select {
+  height: calc(1.5em + 0.5rem + 2px) !important; /* Adjust for size="sm" */
+}
+
+/* Reports and Rating Horizontal Layout */
+.dashboard-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.dashboard-row .card {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-row .card-body {
+  padding: 5px;
+}
+
+.dashboard-row .form-row {
+  margin-bottom: 5px;
+}
+
+.dashboard-row .form-row > div {
+  padding: 0 5px;
+}
+
+/* Modal Styling */
+.modal-body p {
+  margin: 5px 0;
+}
+
+/* Student Dashboard Styling */
+.tight-card .card-body {
+  padding: 5px !important;
+}
+
+.tight-card .list-group-item {
+  padding: 2px !important;
+}
+
+.tight-card .form-group {
+  margin-bottom: 2px !important;
+}
+
+.row.g-3 {
+  margin-bottom: 20px;
+}
+
+.row.g-3 > [class*="col-"] {
+  padding: 0 5px;
+}
+
+/* Register and Login Styling */
+.tight-card {
+  margin-bottom: 1rem !important;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tight-card .card-header {
+  padding: 0.5rem 1rem;
+  background-color: #f8f9fa;
+  font-size: 1rem;
+}
+
+.tight-card .card-body {
+  padding: 0.5rem 1rem;
+}
+
+.tight-card .form-group {
+  margin-bottom: 0.5rem;
+}
+
+.tight-card .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.tight-card table {
+  margin-bottom: 0;
+}
+
+.tight-card .table {
+  font-size: 0.875rem;
+}
+
+.tight-card .table th,
+.tight-card .table td {
+  padding: 0.25rem;
+}
+
+.tight-card .list-group-item {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.container {
+  padding: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem !important;
+}
+
+.mt-2 {
+  margin-top: 0.5rem !important;
+}
+
+.py-1 {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
