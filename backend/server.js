@@ -9,14 +9,7 @@ const XLSX = require('xlsx');
 
 dotenv.config();
 
-const app = express(); // ✅ moved above all app.use/app.get calls
-
-app.use(express.static(path.join(__dirname, "../frontend/build")));
-app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-});
-
-
+const app = express();
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 20,
@@ -26,14 +19,6 @@ const pool = new Pool({
 
 app.use(cors());
 app.use(express.json());
-
-// ===================== Production Serve Frontend =====================
-if (process.env.NODE_ENV === 'production') {
-  // Catch-all route for SPA (React Router)
-  app.get("/*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-  });
-}
 
 // ===================== Database Connection Check =====================
 pool.connect((err, client, release) => {
@@ -222,9 +207,114 @@ app.post('/refresh', async (req, res) => {
   }
 });
 
-// ===================== REST OF YOUR ENDPOINTS =====================
-// (all your faculties, courses, modules, reports, monitoring, etc. go here unchanged)
+// ===================== ADD YOUR OTHER API ROUTES HERE =====================
+// Example routes - add all your actual routes here
 
+// Courses routes
+app.get('/courses', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM courses');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/courses', async (req, res) => {
+  const { name, code, faculty_id } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO courses (name, code, faculty_id) VALUES ($1, $2, $3) RETURNING *',
+      [name, code, faculty_id]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Modules routes
+app.get('/modules', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM modules');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/modules', async (req, res) => {
+  const { name, code, description, course_id, lecturer_id } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO modules (name, code, description, course_id, lecturer_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [name, code, description, course_id, lecturer_id]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reports routes
+app.get('/reports', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM reports');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/reports', async (req, res) => {
+  const {
+    faculty_name, class_name, week, lecture_date, course_name, course_code,
+    lecturer_name, students_present, total_students, venue, scheduled_time,
+    topic_taught, learning_outcomes, recommendations
+  } = req.body;
+  
+  try {
+    const result = await pool.query(
+      `INSERT INTO reports (
+        faculty_name, class_name, week, lecture_date, course_name, course_code,
+        lecturer_name, students_present, total_students, venue, scheduled_time,
+        topic_taught, learning_outcomes, recommendations
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
+      [
+        faculty_name, class_name, week, lecture_date, course_name, course_code,
+        lecturer_name, students_present, total_students, venue, scheduled_time,
+        topic_taught, learning_outcomes, recommendations
+      ]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Users routes
+app.get('/users/lecturers', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE role = $1', ['lecturer']);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add all your other routes here...
+
+// ===================== Production Serve Frontend =====================
+// THIS MUST BE ABSOLUTELY LAST - after ALL API routes
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React app
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+  // Catch-all route for SPA (React Router) - MUST BE LAST ROUTE
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+}
 
 // ===================== START SERVER =====================
 const PORT = process.env.PORT || 5000;
