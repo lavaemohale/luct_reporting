@@ -12,9 +12,10 @@ dotenv.config();
 const app = express(); // ✅ moved above all app.use/app.get calls
 
 app.use(express.static(path.join(__dirname, "../frontend/build")));
-app.get("*", (req, res) => {
+app.get("/*", function (req, res) {
   res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
+
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
