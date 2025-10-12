@@ -9,6 +9,12 @@ const XLSX = require('xlsx');
 
 dotenv.config();
 
+const path = require("path");
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+
 const app = express();
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -22,10 +28,14 @@ app.use(express.json());
 
 // ===================== Production Serve Frontend =====================
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
-  app.get('*', (req, res) =>
-    res.sendFile(path.join(__dirname, '../frontend/build/index.html'))
-  );
+  // Serve frontend (React build)
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+// Catch-all route for SPA (React Router)
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+
 }
 
 // ===================== Database Connection Check =====================
