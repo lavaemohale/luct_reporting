@@ -9,12 +9,13 @@ const XLSX = require('xlsx');
 
 dotenv.config();
 
+const app = express(); // ✅ moved above all app.use/app.get calls
+
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
 
-const app = express();
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 20,
@@ -27,13 +28,10 @@ app.use(express.json());
 
 // ===================== Production Serve Frontend =====================
 if (process.env.NODE_ENV === 'production') {
-  // Serve frontend (React build)
-app.use(express.static(path.join(__dirname, "../frontend/build")));
-
-// Catch-all route for SPA (React Router)
-app.get("/*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-});
+  // Catch-all route for SPA (React Router)
+  app.get("/*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+  });
 }
 
 // ===================== Database Connection Check =====================
@@ -226,8 +224,7 @@ app.post('/refresh', async (req, res) => {
 // ===================== REST OF YOUR ENDPOINTS =====================
 // (all your faculties, courses, modules, reports, monitoring, etc. go here unchanged)
 
-// ... [KEEP all your existing routes exactly as in your current file] ...
 
 // ===================== START SERVER =====================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port 5000`));
