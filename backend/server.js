@@ -305,13 +305,43 @@ app.get('/users/lecturers', async (req, res) => {
 // Add all your other routes here...
 
 // ===================== Production Serve Frontend =====================
-// THIS MUST BE ABSOLUTELY LAST - after ALL API routes
+// Use a specific route for serving React app instead of catch-all
 if (process.env.NODE_ENV === 'production') {
   // Serve static files from the React app
   app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-  // Catch-all route for SPA (React Router) - MUST BE LAST ROUTE
-  app.get('*', (req, res) => {
+  // For any route that doesn't match API routes, serve the React app
+  // Use a specific pattern that doesn't cause path-to-regexp errors
+  app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+  
+  app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+  
+  app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+  
+  app.get('/studentdashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+  
+  app.get('/lecturerdashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+  
+  app.get('/pldashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+  
+  app.get('/prldashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+  
+  // Root route for React app
+  app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   });
 }
