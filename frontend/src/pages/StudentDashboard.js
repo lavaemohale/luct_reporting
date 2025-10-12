@@ -1,18 +1,24 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { Button, Form, Alert } from 'react-bootstrap';
+import { Button, Alert, Card, Row, Col, Spinner } from 'react-bootstrap';
+import ReportForm from '../components/ReportForm';
+import Rating from '../components/Rating';
+import Footer from '../components/Footer';
 
 const StudentDashboard = () => {
-  const { user, setUser } = useContext(AuthContext); // Added setUser for logout on 401
+  const { user, setUser } = useContext(AuthContext);
   const [attendance, setAttendance] = useState([]);
   const [progress, setProgress] = useState([]);
   const [feedback, setFeedback] = useState([]);
   const [error, setError] = useState('');
-  const [reportForm, setReportForm] = useState({ module_name: '', lecture_date: '', comments: '' });
-  const [ratingForm, setRatingForm] = useState({ report_id: '', rating: '', comments: '' });
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Modal states
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [showRatingForm, setShowRatingForm] = useState(false);
+  const [selectedReportForRating, setSelectedReportForRating] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -28,22 +34,23 @@ const StudentDashboard = () => {
         if (!token) throw new Error('No token found');
 
         const [att, prog, fb, rpts] = await Promise.all([
-          api.get('/students/me/attendance'),
-          api.get('/students/me/progress'),
-          api.get('/students/me/feedback'),
-          api.get('/reports'),
+          api.get('/students/me/attendance').catch(() => ({ data: [] })),
+          api.get('/students/me/progress').catch(() => ({ data: [] })),
+          api.get('/students/me/feedback').catch(() => ({ data: [] })),
+          api.get('/reports').catch(() => ({ data: [] }))
         ]);
-        setAttendance(att.data);
-        setProgress(prog.data);
-        setFeedback(fb.data);
-        setReports(rpts.data.filter(r => r.student_id === user.id || r.lecturer_id === user.id));
+        
+        setAttendance(att.data || []);
+        setProgress(prog.data || []);
+        setFeedback(fb.data || []);
+        setReports(rpts.data ? rpts.data.filter(r => r.student_id === user.id || r.lecturer_id === user.id) : []);
       } catch (err) {
         console.error('Dashboard fetch error:', err);
         const errorMessage = err.response ? `API Error: ${err.response.status} - ${err.response.data.message}` : `Network Error: ${err.message}`;
         if (err.response && err.response.status === 401) {
           setError('Session expired. Please log in again.');
-          localStorage.removeItem('token'); // Clear invalid token
-          setUser(null); // Log out user
+          localStorage.removeItem('token');
+          setUser(null);
         } else {
           setError(`Failed to load data. Check backend or network. Details: ${errorMessage}`);
         }
@@ -75,163 +82,231 @@ const StudentDashboard = () => {
       });
   };
 
-  const handleSubmitReport = async (e) => {
-    e.preventDefault();
-    if (!user) {
-      setError('Please log in to submit a report.');
-      return;
-    }
-    try {
-      const response = await api.post('/students/me/reports', {
-        module_name: reportForm.module_name,
-        lecture_date: reportForm.lecture_date,
-        comments: reportForm.comments,
-      });
-      setReports([...reports, response.data]);
-      setReportForm({ module_name: '', lecture_date: '', comments: '' });
-      setError('Report submitted successfully!');
-      setTimeout(() => setError(''), 3000);
-    } catch (err) {
-      console.error('Report submission error:', err);
-      if (err.response && err.response.status === 401) {
-        setError('Session expired. Please log in again.');
-        localStorage.removeItem('token');
-        setUser(null);
-      } else {
-        setError('Failed to submit report');
-      }
-    }
+  // Handle Report Submission from ReportForm component
+  const handleReportSubmitted = (newReport) => {
+    setReports(prev => [...prev, newReport]);
+    setError('Report submitted successfully!');
+    setTimeout(() => setError(''), 3000);
   };
 
-  const handleSubmitRating = async (e) => {
-    e.preventDefault();
-    if (!user) {
-      setError('Please log in to submit a rating.');
-      return;
-    }
-    try {
-      await api.post('/ratings', {
-        report_id: ratingForm.report_id,
-        rating: parseInt(ratingForm.rating),
-        comments: ratingForm.comments,
-      });
-      setRatingForm({ report_id: '', rating: '', comments: '' });
-      setError('Rating submitted successfully!');
-      setTimeout(() => setError(''), 3000);
-    } catch (err) {
-      console.error('Rating submission error:', err);
-      if (err.response && err.response.status === 401) {
-        setError('Session expired. Please log in again.');
-        localStorage.removeItem('token');
-        setUser(null);
-      } else {
-        setError('Failed to submit rating');
-      }
-    }
-  };
+  // Handle Rating Submission from Rating component
+  const handleRatingSubmitted = () => {
+  setError('Rating submitted successfully!');
+  setTimeout(() => setError(''), 3000);
+};
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
+      <Spinner animation="border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    </div>
+  );
+  
   if (!user) return <div>Please log in to view the dashboard.</div>;
 
   return (
-    <div className="container mt-5">
-      <h2>Welcome, {user.name}</h2>
+    <div className="d-flex flex-column min-vh-100">
+      <div className="container mt-5 flex-grow-1">
+        <h2>Welcome, {user.name}</h2>
 
-      {error && <Alert variant={error.includes('successfully') ? 'success' : 'danger'}>{error}</Alert>}
+        {error && (
+          <Alert variant={error.includes('successfully') ? 'success' : 'danger'}>
+            {error}
+          </Alert>
+        )}
 
-      <h3>Attendance</h3>
-      {attendance.length > 0 ? (
-        <ul>
-          {attendance.map((a, i) => (
-            <li key={i}>{a.module_name} - {a.lecture_date} - {a.present}</li>
-          ))}
-        </ul>
-      ) : <p>No attendance data</p>}
+        <Row>
+          <Col md={4}>
+            <Card className="mb-4">
+              <Card.Header>
+                <h5>Attendance</h5>
+              </Card.Header>
+              <Card.Body>
+                {attendance.length > 0 ? (
+                  <ul className="list-unstyled">
+                    {attendance.map((a, i) => (
+                      <li key={i} className="mb-2">
+                        <strong>{a.module_name}</strong><br />
+                        {a.lecture_date} - {a.present ? 'Present' : 'Absent'}
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p className="text-muted">No attendance data</p>}
+              </Card.Body>
+            </Card>
+          </Col>
 
-      <h3>Progress</h3>
-      {progress.length > 0 ? (
-        <ul>
-          {progress.map((p, i) => (
-            <li key={i}>{p.module_name} - {p.progress * 100}%</li>
-          ))}
-        </ul>
-      ) : <p>No progress data</p>}
+          <Col md={4}>
+            <Card className="mb-4">
+              <Card.Header>
+                <h5>Progress</h5>
+              </Card.Header>
+              <Card.Body>
+                {progress.length > 0 ? (
+                  <ul className="list-unstyled">
+                    {progress.map((p, i) => (
+                      <li key={i} className="mb-2">
+                        <strong>{p.module_name}</strong><br />
+                        <div className="progress mb-1">
+                          <div 
+                            className="progress-bar" 
+                            style={{ width: `${p.progress * 100}%` }}
+                          >
+                            {(p.progress * 100).toFixed(1)}%
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p className="text-muted">No progress data</p>}
+              </Card.Body>
+            </Card>
+          </Col>
 
-      <h3>Feedback</h3>
-      {feedback.length > 0 ? (
-        <div>
-          <ul>
-            {feedback.map((f, i) => (
-              <li key={i}>{f.module_name} - {f.lecture_date} - {f.feedback}</li>
-            ))}
-          </ul>
-          <Button onClick={handleDownloadFeedback}>Download Feedback</Button>
-        </div>
-      ) : <p>No feedback data</p>}
+          <Col md={4}>
+            <Card className="mb-4">
+              <Card.Header>
+                <h5>Feedback</h5>
+              </Card.Header>
+              <Card.Body>
+                {feedback.length > 0 ? (
+                  <div>
+                    <ul className="list-unstyled">
+                      {feedback.map((f, i) => (
+                        <li key={i} className="mb-2">
+                          <strong>{f.module_name}</strong><br />
+                          {f.lecture_date} - {f.feedback}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button onClick={handleDownloadFeedback} variant="primary" size="sm">
+                      Download Feedback
+                    </Button>
+                  </div>
+                ) : <p className="text-muted">No feedback data</p>}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
-      <h3>Submit Report</h3>
-      <Form onSubmit={handleSubmitReport}>
-        <Form.Group className="mb-3">
-          <Form.Label>Module Name</Form.Label>
-          <Form.Control
-            type="text"
-            value={reportForm.module_name}
-            onChange={(e) => setReportForm({ ...reportForm, module_name: e.target.value })}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Lecture Date</Form.Label>
-          <Form.Control
-            type="date"
-            value={reportForm.lecture_date}
-            onChange={(e) => setReportForm({ ...reportForm, lecture_date: e.target.value })}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Comments</Form.Label>
-          <Form.Control
-            as="textarea"
-            value={reportForm.comments}
-            onChange={(e) => setReportForm({ ...reportForm, comments: e.target.value })}
-          />
-        </Form.Group>
-        <Button variant="primary" type="submit">Submit Report</Button>
-      </Form>
+        <Row>
+          <Col md={6}>
+            <Card className="mb-4">
+              <Card.Header className="d-flex justify-content-between align-items-center">
+                <h5>My Reports ({reports.length})</h5>
+                <Button variant="primary" size="sm" onClick={() => setShowReportForm(true)}>
+                  Submit New Report
+                </Button>
+              </Card.Header>
+              <Card.Body>
+                {reports.length > 0 ? (
+                  <div className="table-responsive">
+                    <table className="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>Module</th>
+                          <th>Date</th>
+                          <th>Comments</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {reports.map(report => (
+                          <tr key={report.id}>
+                            <td>{report.module_name}</td>
+                            <td>{new Date(report.lecture_date).toLocaleDateString()}</td>
+                            <td>{report.comments}</td>
+                            <td>
+                              <Button 
+                                variant="outline-primary" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedReportForRating(report);
+                                  setShowRatingForm(true);
+                                }}
+                              >
+                                Rate
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-muted">No reports submitted yet.</p>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
 
-      <h3>Rate a Report</h3>
-      <Form onSubmit={handleSubmitRating}>
-        <Form.Group className="mb-3">
-          <Form.Label>Report ID</Form.Label>
-          <Form.Control
-            type="text"
-            value={ratingForm.report_id}
-            onChange={(e) => setRatingForm({ ...ratingForm, report_id: e.target.value })}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Rating (1-5)</Form.Label>
-          <Form.Control
-            type="number"
-            min="1"
-            max="5"
-            value={ratingForm.rating}
-            onChange={(e) => setRatingForm({ ...ratingForm, rating: e.target.value })}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Comments</Form.Label>
-          <Form.Control
-            as="textarea"
-            value={ratingForm.comments}
-            onChange={(e) => setRatingForm({ ...ratingForm, comments: e.target.value })}
-          />
-        </Form.Group>
-        <Button variant="primary" type="submit">Submit Rating</Button>
-      </Form>
+          <Col md={6}>
+            <Card className="mb-4">
+              <Card.Header className="d-flex justify-content-between align-items-center">
+                <h5>Rate Reports</h5>
+                <Button 
+                  variant="primary" 
+                  size="sm" 
+                  onClick={() => {
+                    setSelectedReportForRating(null);
+                    setShowRatingForm(true);
+                  }}
+                >
+                  Add Rating
+                </Button>
+              </Card.Header>
+              <Card.Body>
+                <p>Rate lecture reports to provide feedback on your learning experience.</p>
+                <ul className="list-unstyled">
+                  {reports.map(report => (
+                    <li key={report.id} className="mb-2 p-2 border rounded">
+                      <strong>{report.module_name}</strong> - {new Date(report.lecture_date).toLocaleDateString()}
+                      <br />
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm" 
+                        className="mt-1"
+                        onClick={() => {
+                          setSelectedReportForRating(report);
+                          setShowRatingForm(true);
+                        }}
+                      >
+                        Rate This Report
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+                {reports.length === 0 && (
+                  <p className="text-muted">Submit a report first to rate it.</p>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Report Form Modal */}
+        <ReportForm 
+          show={showReportForm}
+          onHide={() => setShowReportForm(false)}
+          onReportSubmitted={handleReportSubmitted}
+        />
+
+        {/* Rating Modal */}
+        <Rating 
+          show={showRatingForm}
+          onHide={() => {
+            setShowRatingForm(false);
+            setSelectedReportForRating(null);
+          }}
+          onRatingSubmitted={handleRatingSubmitted}
+          reportId={selectedReportForRating?.id}
+          reportDetails={selectedReportForRating}
+        />
+      </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

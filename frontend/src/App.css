@@ -1,100 +1,102 @@
-/* ========== GLOBAL RESET ========== */
+/* =================== GLOBAL RESET =================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html,
 body {
-  height: 100%;
   font-family: "Poppins", "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(135deg, #f7faff, #eef3ff);
+  background: linear-gradient(135deg, #f5f8ff, #eef3ff);
   color: #333;
+  min-height: 100vh;
 }
 
-/* ========== NAVBAR (keeps your layout but refreshes look) ========== */
+/* =================== NAVBAR =================== */
 nav {
-  background-color: #1a1a1a;
-  color: #fff;
-  padding: 12px 50px;
+  background: linear-gradient(90deg, #62a8e9, #63a9ea); /* 🌤️ Baby blue gradient */
+  color: #023567;
+  padding: 14px 50px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #b3daff;
 }
 
 nav .logo {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  color: #003366;
 }
 
 nav .nav-links {
   display: flex;
-  gap: 20px;
+  gap: 24px;
 }
 
 nav .nav-links a {
-  color: #ddd;
+  color: #003366;
   text-decoration: none;
-  transition: color 0.2s;
+  font-weight: 500;
+  transition: color 0.2s, transform 0.1s;
 }
 
 nav .nav-links a:hover {
-  color: #fff;
+  color: #0056b3;
+  transform: translateY(-1px);
 }
 
-/* ========== AUTH PAGES (Login & Register) ========== */
-.auth-container {
-  min-height: calc(100vh - 60px);
+/* =================== AUTH PAGES (Login + Register) =================== */
+.auth-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #f0f4ff, #fdfdfd);
-  padding: 40px 15px;
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg, #f0f7ff, #ffffff);
+  padding: 20px;
 }
 
-/* Card styling */
+/* Card container */
 .auth-card {
   background: #ffffff;
   width: 100%;
   max-width: 420px;
   padding: 40px 35px;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .auth-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 /* Title */
 .auth-card h2 {
   text-align: center;
-  color: #0d6efd;
+  color: #003366;
   font-weight: 600;
   margin-bottom: 25px;
-  letter-spacing: 0.3px;
 }
 
-/* Labels & Inputs */
+/* Inputs */
 .auth-card label {
-  display: block;
   font-weight: 500;
-  margin-bottom: 6px;
-  color: #333;
+  margin-bottom: 5px;
+  display: block;
+  color: #003366;
 }
 
 .auth-card input,
 .auth-card select {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d0d7e2;
   border-radius: 10px;
+  border: 1px solid #8ab0f6;
   margin-bottom: 16px;
+  font-size: 0.95rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -109,55 +111,192 @@ nav .nav-links a:hover {
 .auth-card button {
   width: 100%;
   padding: 12px;
-  background-color: #0d6efd;
-  color: white;
+  background-color: #2475ef;
   border: none;
+  color: #fff;
   border-radius: 10px;
-  font-weight: 500;
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.25s, transform 0.1s;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 .auth-card button:hover {
-  background-color: #0b5ed7;
+  background-color: #0056b3;
   transform: translateY(-1px);
 }
 
 /* Alerts */
-.alert {
+.auth-card .alert {
   margin-top: 10px;
   border-radius: 8px;
   font-size: 0.9rem;
-  padding: 10px 12px;
 }
 
-/* Switch links (e.g. “Already have an account? Login”) */
-.switch-text {
+/* Switch link */
+.auth-card .switch-text {
   text-align: center;
   margin-top: 18px;
   font-size: 0.9rem;
 }
 
-.switch-text a {
-  color: #0d6efd;
+.auth-card .switch-text a {
+  color: #1971f5;
   text-decoration: none;
   font-weight: 500;
 }
 
-.switch-text a:hover {
+.auth-card .switch-text a:hover {
   text-decoration: underline;
 }
 
-/* ========== RESPONSIVE DESIGN ========== */
+/* Responsive */
 @media (max-width: 500px) {
-  nav {
-    flex-direction: column;
-    gap: 10px;
-    padding: 15px;
-  }
-
   .auth-card {
     padding: 30px 25px;
   }
+}
+
+/* Ensure proper footer placement */
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+/* Footer styles */
+footer {
+  margin-top: auto;
+}
+
+/* Ensure content doesn't get hidden behind footer */
+body {
+  padding-bottom: 0;
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+  footer .text-md-end {
+    text-align: left !important;
+    margin-top: 1rem;
+  }
+}
+
+/* Ensure proper footer placement */
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+/* Footer styles */
+footer {
+  margin-top: auto;
+}
+
+/* Ensure content doesn't get hidden behind footer */
+body {
+  padding-bottom: 0;
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+  footer .text-md-end {
+    text-align: left !important;
+    margin-top: 1rem;
+  }
+}
+
+/* Additional styling for better layout */
+.d-flex.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Ensure proper footer placement */
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+/* Footer styles */
+footer {
+  margin-top: auto;
+}
+
+/* Ensure content doesn't get hidden behind footer */
+body {
+  padding-bottom: 0;
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+  footer .text-md-end {
+    text-align: left !important;
+    margin-top: 1rem;
+  }
+}
+
+/* Additional styling for better layout */
+.d-flex.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* HomePage specific styles */
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+/* Card shadows for better appearance */
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* Progress bar animations */
+.progress-bar {
+  transition: width 0.6s ease;
+}
+
+/* Table responsive fixes */
+.table-responsive {
+  border-radius: 0.375rem;
+}
+
+/* Button hover effects */
+.btn {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Navbar brand styling */
+.navbar-brand {
+  font-weight: 600;
+}
+
+/* Alert dismissible button */
+.alert-dismissible .btn-close {
+  padding: 0.75rem 0.75rem;
+}
+
+.custom-baby-blue {
+  background-color: #60c0ed !important;
 }

@@ -7,7 +7,7 @@ const NavBar = () => {
   const { user, logout } = useContext(AuthContext);
 
   return (
-    <BsNavbar bg="dark" variant="dark" expand="lg">
+    <BsNavbar bg="info" variant="dark" expand="lg">
       <Container>
         <BsNavbar.Brand as={Link} to="/">LUCT Reporting</BsNavbar.Brand>
         <BsNavbar.Toggle aria-controls="basic-navbar-nav" />
@@ -15,14 +15,15 @@ const NavBar = () => {
           <Nav className="ms-auto">
             {user ? (
               <>
-                <Nav.Link as={Link} to={`/${user.role.toLowerCase()}dashboard`}>Dashboard</Nav.Link>
+                <Nav.Link as={Link} to="/">Home</Nav.Link>
+                <Nav.Link as={Link} to={`/${user.role.toLowerCase()}dashboard`}>
+                  Dashboard
+                </Nav.Link>
                 <Nav.Link onClick={logout}>Logout</Nav.Link>
               </>
             ) : (
-              <>
-                <Nav.Link as={Link} to="/login">Login</Nav.Link>
-                <Nav.Link as={Link} to="/register">Register</Nav.Link>
-              </>
+              // Only show Home link when not logged in
+              <Nav.Link as={Link} to="/">Home</Nav.Link>
             )}
           </Nav>
         </BsNavbar.Collapse>

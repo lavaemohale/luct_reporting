@@ -14,13 +14,12 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Attempting token refresh...');
       const response = await api.post('/refresh');
-      const { token } = response.data;
+      const { token, user: userData } = response.data;
       
       localStorage.setItem('token', token);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      const decodedUser = jwtDecode(token);
-      setUser(decodedUser);
+      setUser(userData);
       
       console.log('Token refreshed successfully');
       return token;
@@ -125,7 +124,6 @@ export const AuthProvider = ({ children }) => {
       
       console.log('Sending login data to /login:', loginData);
       
-      // ✅ FIXED: Changed from '/auth/login' to '/login'
       const response = await api.post('/login', loginData);
       console.log('Login response:', response.data);
       
@@ -178,7 +176,7 @@ export const AuthProvider = ({ children }) => {
       setError('');
       setLoading(true);
       
-      const { data } = await api.post('/register', { 
+      const response = await api.post('/register', { 
         email, 
         password, 
         role, 
@@ -186,7 +184,7 @@ export const AuthProvider = ({ children }) => {
         student_number 
       });
       
-      return data;
+      return response.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Registration failed';
       setError(errorMessage);
@@ -224,6 +222,19 @@ export const AuthProvider = ({ children }) => {
     return localStorage.getItem('token');
   };
 
+  // Get user's dashboard path
+  const getDashboardPath = () => {
+    if (!user) return '/';
+    return `/${user.role.toLowerCase()}dashboard`;
+  };
+
+  // Navigate to user's dashboard
+  const navigateToDashboard = (navigate) => {
+    if (user) {
+      navigate(getDashboardPath());
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -235,7 +246,9 @@ export const AuthProvider = ({ children }) => {
     hasRole,
     isAuthenticated,
     getToken,
-    refreshToken
+    refreshToken,
+    getDashboardPath,
+    navigateToDashboard
   };
 
   return (
